@@ -24,6 +24,7 @@ import javafx.stage.Stage;
 import java.io.*;
 import java.nio.file.DirectoryStream;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.io.*;
@@ -121,6 +122,72 @@ public class WindowController {
 
     }
 
+    private void newData(List<Label> list ,String name1, String desc) {
+        int selectIndex = SubList.getSelectionModel().getSelectedIndex();
+        if (selectIndex < 0) return;
+        String name = SubList.getItems().get(selectIndex).toString();
+        String sname = String.format("%s(%s[(%s)])",name, name1,desc);
+        SubList.getItems().add(sname);
+        LogMap.put(sname, (ArrayList<Label>) list);
+
+    }
+
+    @FXML
+    protected void Search() throws IOException {
+        while (true) {
+            Stage stage = new Stage();
+            FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("search.fxml"));
+            Scene scene = new Scene(fxmlLoader.load(), 320, 100);
+            stage.setResizable(false);
+            stage.setTitle("SearchWindow");
+            stage.setScene(scene);
+            stage.showAndWait();
+
+            SearchWindowController controller = fxmlLoader.getController();
+
+            if (controller.isCanceled()) return;
+
+            String text = controller.getText();
+            if (text.isEmpty() || text == null) {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("NotData");
+                alert.setHeaderText(null);
+                alert.setContentText("検索する文字列を入力してください。");
+                alert.showAndWait();
+
+                continue;
+
+            }
+
+            Filter filter = new Filter();
+            View view = new View();
+
+            List<Label> tmp =  filter.includeText(text, MainList);
+            if(!tmp.isEmpty()) {
+                List<Label> list = view.Marking(MainList.getItems().stream().toList(), tmp, "cyan");
+                newData(list, "searched", text);
+
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Found");
+                alert.setHeaderText("発見しました。");
+                alert.setContentText("ヒット件数:"+tmp.size());
+                alert.showAndWait();
+
+                break;
+
+            } else {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("NotFound");
+                alert.setHeaderText(null);
+                alert.setContentText("見つかりませんでした。");
+                alert.showAndWait();
+
+            }
+
+        }
+
+    }
+
     @FXML
     protected void Filter() throws IOException {
         while (true) {
@@ -145,7 +212,7 @@ public class WindowController {
             View view = new View();
             List<Label> tmp;
 
-            if (text.isEmpty()) {
+            if (text.isEmpty() || text == null) {
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setTitle("NotData");
                 alert.setHeaderText(null);
@@ -186,12 +253,13 @@ public class WindowController {
             switch (viewModeIndex) {
                 default:
                 case 0:
-                    List<Label> list = view.Marking(MainList.getItems().stream().toList(), tmp);
-                    MainList.getItems().setAll(list);
+                    List<Label> list = view.Marking(MainList.getItems().stream().toList(),tmp, "lime");
+                    newData(list, "filtered", text);
+
                     break;
 
                 case 1:
-                    MainList.getItems().setAll(tmp);
+                    newData(tmp, "filter", text);
                     break;
             }
             break;
