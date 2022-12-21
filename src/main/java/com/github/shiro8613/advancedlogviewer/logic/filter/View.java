@@ -7,12 +7,12 @@ import java.util.List;
 
 public class View {
 
-    public List<Label> Marking(List<Label> Old, List<Label> New) {
+    public List<Label> Marking(List<Label> Old, List<Label> New, String color) {
         List<Label> list = new ArrayList<Label>();
         Old.forEach(x -> {
             New.forEach(y -> {
                 if (x == y) {
-                    y.setStyle("-fx-background-color: lime;");
+                    y.setStyle("-fx-background-color: "+color+";");
                     list.add(y);
                 } else {
                     list.add(x);
