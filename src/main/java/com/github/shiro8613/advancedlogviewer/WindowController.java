@@ -3,29 +3,25 @@ package com.github.shiro8613.advancedlogviewer;
 import com.github.shiro8613.advancedlogviewer.logic.file.FileController;
 import com.github.shiro8613.advancedlogviewer.logic.filter.Filter;
 import com.github.shiro8613.advancedlogviewer.logic.filter.View;
+import javafx.beans.InvalidationListener;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.*;
-import java.nio.file.DirectoryStream;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.zip.GZIPInputStream;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.io.*;
 
@@ -41,13 +37,6 @@ public class WindowController {
 
     private Map<String, ArrayList<Label>> LogMap = new HashMap<String, ArrayList<Label>>();
 
-    public ListView getMainList() {
-        return this.MainList;
-    }
-
-    public void setMainList(List<Object> list) {
-        this.MainList.getItems().setAll(list);
-    }
 
     @FXML
     protected void OpenButton() throws IOException {
@@ -95,25 +84,34 @@ public class WindowController {
         if (selectIndex < 0) return;
         String name = SubList.getItems().get(selectIndex).toString();
         List<Label> loglist = LogMap.get(name);
+        MainList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         MainList.getItems().setAll(loglist);
     }
 
     @FXML
     protected void Marking() {
-        int selectIndex = MainList.getSelectionModel().getSelectedIndex();
-        if(selectIndex < 0) return;
+        List<Integer> selectIndex = MainList.getSelectionModel().getSelectedIndices();
+        if(selectIndex.isEmpty()) return;
         List<Label> New = MainList.getItems().stream().toList();
-        New.get(selectIndex).setStyle("-fx-background-color: yellow;");
+        selectIndex.forEach(x -> {
+            New.get(x).setStyle("-fx-background-color: yellow;");
+        });
         MainList.getItems().setAll(New);
     }
 
     @FXML
     protected void Copy() {
-        int selectIndex = MainList.getSelectionModel().getSelectedIndex();
-        if(selectIndex < 0) return;
-        Label label = (Label) MainList.getItems().get(selectIndex);
-        String text = label.getText();
+        List<Integer> selectIndex = MainList.getSelectionModel().getSelectedIndices();
+        if(selectIndex.isEmpty()) return;
 
+        List<String> list = new ArrayList<>();
+        
+        selectIndex.forEach(x -> {
+            Label label = (Label) MainList.getItems().get(x);
+            list.add(label.getText());
+        });
+
+        String text = String.join("\n", list);
 
         final Clipboard clipboard = Clipboard.getSystemClipboard();
         final ClipboardContent content = new ClipboardContent();
@@ -165,7 +163,7 @@ public class WindowController {
             List<Label> tmp =  filter.includeText(text, MainList);
             if(!tmp.isEmpty()) {
                 List<Label> list = view.Marking(MainList.getItems().stream().toList(), tmp, "cyan");
-                newData(list, "searched", text);
+                newData(list, "Searched", text);
 
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setTitle("Found");
@@ -254,12 +252,12 @@ public class WindowController {
                 default:
                 case 0:
                     List<Label> list = view.Marking(MainList.getItems().stream().toList(),tmp, "lime");
-                    newData(list, "filtered", text);
+                    newData(list, "MarkingFilter", text);
 
                     break;
 
                 case 1:
-                    newData(tmp, "filter", text);
+                    newData(tmp, "DeleteFilter", text);
                     break;
             }
             break;
