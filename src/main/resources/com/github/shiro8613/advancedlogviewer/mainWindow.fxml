@@ -46,7 +46,7 @@
             <ListView fx:id="SubList" onMouseClicked="#SubSelectView" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
          </left>
          <center>
-            <ListView fx:id="MainList" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+             <ListView fx:id="MainList" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
          </center>
          <VBox.margin>
             <Insets />
