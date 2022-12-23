@@ -8,6 +8,6 @@ Javaで作られた主にマイクラのログ解析用ツール
 
 **普通のJARとしてビルドしてください。**
 
-ただ**普通のjreでは実行できない**ので[JavaFX-JRE]("https://github.com/shiro8613/JavaFX-JRE")で実行してください。
+ただ**普通のjreでは実行できない**ので[JavaFX-JRE](https://github.com/shiro8613/JavaFX-JRE)で実行してください。
 
-また[Launch4j]("https://launch4j.sourceforge.net/")を使って単一ファイル化する場合も**上記のJREを利用して**ください。
+また[Launch4j](https://launch4j.sourceforge.net/)を使って単一ファイル化する場合も**上記のJREを利用して**ください。
