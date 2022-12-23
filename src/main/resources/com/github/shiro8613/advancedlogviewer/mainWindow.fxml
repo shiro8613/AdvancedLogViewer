@@ -22,9 +22,8 @@
                      <items>
                          <MenuItem mnemonicParsing="false" onAction="#OpenButton" text="Open" />
                          <MenuItem mnemonicParsing="false" onAction="#EjectFiles" text="EjectFiles"/>
-                         <MenuItem mnemonicParsing="false" text="Save" />
+                         <MenuItem mnemonicParsing="false" onAction="#SaveButton" text="Save" />
                          <MenuItem mnemonicParsing="false" onAction="#QuitButton" text="Quit" />
-
                      </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Edit">

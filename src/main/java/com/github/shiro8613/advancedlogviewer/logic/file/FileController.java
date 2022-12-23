@@ -43,4 +43,17 @@ public class FileController {
 
         return log;
     }
+
+    public void SaveLogic(String name, List<Label> list) throws IOException {
+        File file = new File(name);
+        BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+        list.forEach(l -> {
+            try {
+                bw.write(l.getText());
+                bw.newLine();
+            } catch (IOException e){}
+        });
+
+        bw.close();
+    }
 }

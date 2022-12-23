@@ -3,9 +3,6 @@ package com.github.shiro8613.advancedlogviewer;
 import com.github.shiro8613.advancedlogviewer.logic.file.FileController;
 import com.github.shiro8613.advancedlogviewer.logic.filter.Filter;
 import com.github.shiro8613.advancedlogviewer.logic.filter.View;
-import javafx.beans.InvalidationListener;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -21,7 +18,6 @@ import javafx.stage.Stage;
 
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.io.*;
 
@@ -35,7 +31,7 @@ public class WindowController {
     @FXML
     private ListView SubList;
 
-    private Map<String, ArrayList<Label>> LogMap = new HashMap<String, ArrayList<Label>>();
+    private final Map<String, ArrayList<Label>> LogMap = new HashMap<>();
 
 
     @FXML
@@ -46,7 +42,7 @@ public class WindowController {
 
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Resource File");
-        ;
+
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Log Files", "*.log"),
                 new FileChooser.ExtensionFilter("Text Files", "*.txt"),
@@ -60,6 +56,42 @@ public class WindowController {
             ArrayList<Label> log = new FileController().OpenLogic(selectedFile, name, SubList);
             LogMap.put(name, log);
         }
+    }
+
+    @FXML
+    protected void SaveButton() throws IOException{
+        Stage stage = new Stage();
+        FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("save.fxml"));
+        Scene scene = new Scene(fxmlLoader.load(), 320, 200);
+        stage.setResizable(false);
+        stage.setTitle("SaveWindow");
+        stage.setScene(scene);
+        SaveWindowController saveWindowController = fxmlLoader.getController();
+        saveWindowController.setList(SubList.getItems().stream().toList());
+        stage.showAndWait();
+
+        FileController fileController = new FileController();
+        List<Integer> selectedList = saveWindowController.getSelected();
+        List<String> list = saveWindowController.getList();
+        List<String> out = new ArrayList<>();
+        String path = saveWindowController.getPath();
+
+        selectedList.forEach(i -> {
+            String sel = list.get(i);
+            List<Label> selected = LogMap.get(sel);
+            try {
+                fileController.SaveLogic(path + "/" + sel + ".log", selected);
+            } catch (IOException e) {}
+            out.add(sel);
+        });
+
+        String outed = String.join(", ", out);
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("完了");
+        alert.setHeaderText("書き込みが完了しました。");
+        alert.setContentText("完了したファイル: " + outed);
+        alert.showAndWait();
     }
     @FXML
     protected void QuitButton() {
@@ -162,7 +194,7 @@ public class WindowController {
 
             List<Label> tmp =  filter.includeText(text, MainList);
             if(!tmp.isEmpty()) {
-                List<Label> list = view.Marking(MainList.getItems().stream().toList(), tmp, "cyan");
+                List<Label> list = view.Marking(MainList.getItems().stream(), tmp, "cyan");
                 newData(list, "Searched", text);
 
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -251,7 +283,7 @@ public class WindowController {
             switch (viewModeIndex) {
                 default:
                 case 0:
-                    List<Label> list = view.Marking(MainList.getItems().stream().toList(),tmp, "lime");
+                    List<Label> list = view.Marking(MainList.getItems().stream(),tmp, "lime");
                     newData(list, "MarkingFilter", text);
 
                     break;
